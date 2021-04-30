@@ -1,0 +1,2284 @@
+---
+title: "NAAT for tuberculosis detection in blood: systematic reviews and meta-analyses for Research in context box, Lancet Microbe submission"
+author: "Linda Boloko, David Barr"
+date: "13/12/2020"
+output:
+  pdf_document:
+    toc: true
+    number_sections: true
+    toc_depth: 3
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+library(patchwork)
+library(ggbeeswarm)
+library(funnelR)
+library(car)
+library(ks)
+library(knitr)
+library(kableExtra)
+library(grid)
+library(GGally)
+library(ggthemes)
+library(pheatmap)
+library(gridExtra)
+library(ggpubr)
+library(ggrepel)
+library(DescTools)
+library(viridis)
+library(lme4)
+library(brms)
+library(revtools)
+library(tidyverse)
+
+theme_dab <- function () { 
+  theme_minimal() %+replace% 
+    theme(
+      panel.grid.minor = element_line(colour="grey95"),
+      panel.grid.major = element_line(colour="grey90"),
+      panel.background = element_rect(colour="grey90", fill="grey98")
+    )
+}
+
+```  
+
+# Preface
+
+This document reports two systematic reviews and meta-analyses of literature on use of nucleic acid amplification technology (NAAT) to detect *M. tuberculosis* in patient blood samples. The first meta-analysis is focused on blood NAAT for TB diagnosis; the second is on bloood NAAT to diagnose *M. tuberculosis* blood stream infection (MTBBSI).  
+
+The motivation for these reviews is to inform the "Evidence before this study" section of the *Research in context* box for the KDHTB blood Xpert-ultra manuscript submission to *Lancet Microbe*.  
+
+This document is an Rmarkdown knitted as a pdf. This means alll the code for the analysis from raw data to final figures is embedded (so 100% reproducible). The code chunks are suppressed for readability but available at git repository [url: ].  
+
+
+# Systematic Review 1: TB diagnosis using blood NAAT
+
+## Introduction
+
+### Aims & objectives
+
+We want to systematically review literature on use of nucleic acid amplification technology (NAAT) to identify *M. tuberculosis* in patients' blood samples as a diagnostic for tuberculosis. Aims are to summarise:
+
+1. What NAAT methods including blood pre-processing have been used for identifying *M. tuberculosis* in blood.
+2. Reported sensitivity and specificity of blood *M. tuberculosis* NAAT **for tuberculosis**.  
+
+Systematic review and meta-analysis of studies using NAAT on blood to diagnose TB will be performed. 
+
+### Inclusions & exclusions
+
+Studies in which investigators used NAAT to identify *M. tuberculosis* in peripheral blood samples (whole blood or component) from patients identified prospectively with either suspected tuberculosis (e.g. cohort design) or confirmed tuberculosis diagnosis (e.g. case-control design) will be included.  
+
+Studies where it is unclear if patients were identified prospectively for blood NAAT testing (e.g. studies where inclusion was based on opportunistic receipt of a blood sample), studies where it is unclear what reference standard for tuberculosis diagnosis was, and studies reporting artificially spiked sample experiments (patient samples spiked with *M. tuberculosis* *ex vivo*) will be excluded.  
+
+### Data for extraction  
+
+We will extract data on patient populations (adult versus paediatic, HIV status, TB prevalence, pulmonary versus extra-pulmonary, inpatient versus outpatient) and NAAT method (commercial v in-house, blood pre-processing, blood volume).
+
+### Analysis plan
+
+Descriptive summaries using figures and tables. Bivariate random-effects regression acounting for correlation between sensitivity and specificity will be used to summarised central tendancies and heterogeneity. These will be fit using a Baysian (MCMC) approach implemented with the package *brms* in R studio. Meta-regression on selected covariates will be performed using bivariate regression to test association between study and method covariates and diagnostic performance.  
+
+### Bias assessment
+
+Identified studies will be assessed for risk of bias using questions adapted from the QUADRA-2 tool:  
+
+* **Patient selection** . Are methods of patient selection adequately described (prior testing, presentation, intended use of index test and setting)? Was a consecutive or random sample of patients enrolled in a cohort design? Was HIV status of patients ascertained? 
+* **Index test** . Were the index test results interpreted without knowledge of the results of the reference standard? 
+* **Reference standard** . Were the reference standard results interpreted without knowledge of the results of the index test? Did all patients have at least 2 TB diagnostic tests (e.g. culture, NAAT, antigent testing, excluding the index test) performed from at least 2 different body sites (e.g. sputum and urine)? Was the index test excluded from the reference standard?
+* **Flow and timing** . If blood NAAT was performed on only a subgroup of patients are the inclusion/exclusion criteria for this subgroup given? Was blood NAAT performed from samples taken at same timepoint as reference standard samples?  
+
+If answers to >1 or >3 of these questions are "no" or "unclear" risk of bias will be rated as moderate or high.
+
+
+## Search strategies
+
+### PubMed
+
+Terms used in main PubMed search engine:  
+
+**tuberculosis AND (blood OR mycobacteraemia OR "blood stream infection" OR bacteraemia OR bacillaemia) AND (NAAT OR PCR OR Xpert) AND diagnosis**
+
+This is translated by PubMed algorithm into an expanded search query which we have edited to remove irrelevant search terms (e.g. "blood" is linked to a range of haematology terms which are irrelavant and these have been removed by editing in the advanced search editor). This give a final expanded search query of:
+
+*("tuberculosi"[All Fields] OR "tuberculosis"[MeSH Terms] OR "tuberculosis"[All Fields] OR "tuberculoses"[All Fields] OR "tuberculosis s"[All Fields])*  
+AND  
+*("blood"[MeSH Subheading] OR "blood"[All Fields] OR "blood"[MeSH Terms] OR "mycobacteraemia"[All Fields] OR "blood stream infection"[All Fields] OR ("bacteraemia"[All Fields] OR "bacteremia"[MeSH Terms] OR "bacteremia"[All Fields] OR "bacteraemias"[All Fields] OR "bacteremias"[All Fields]) OR "bacillaemia"[All Fields])*  
+AND  
+*("nucleic acid amplification techniques"[MeSH Terms] OR ("nucleic"[All Fields] AND "acid"[All Fields] AND "amplification"[All Fields] AND "techniques"[All Fields]) OR "nucleic acid amplification techniques"[All Fields] OR "naat"[All Fields] OR "PCR"[All Fields] OR "Xpert"[All Fields]) AND ("diagnosable"[All Fields] OR "diagnosi"[All Fields] OR "diagnosis"[MeSH Terms] OR "diagnosis"[All Fields] OR "diagnose"[All Fields] OR "diagnosed"[All Fields] OR "diagnoses"[All Fields] OR "diagnosing"[All Fields] OR "diagnosis"[MeSH Subheading])*  
+
+This retured [951 results](https://pubmed.ncbi.nlm.nih.gov/?term=%28%22tuberculosi%22%5BAll+Fields%5D+OR+%22tuberculosis%22%5BMeSH+Terms%5D+OR+%22tuberculosis%22%5BAll+Fields%5D+OR+%22tuberculoses%22%5BAll+Fields%5D+OR+%22tuberculosis+s%22%5BAll+Fields%5D%29+AND+%28%22blood%22%5BMeSH+Subheading%5D+OR+%22blood%22%5BAll+Fields%5D+OR+%22blood%22%5BMeSH+Terms%5D+OR+%22mycobacteraemia%22%5BAll+Fields%5D+OR+%22blood+stream+infection%22%5BAll+Fields%5D+OR+%28%22bacteraemia%22%5BAll+Fields%5D+OR+%22bacteremia%22%5BMeSH+Terms%5D+OR+%22bacteremia%22%5BAll+Fields%5D+OR+%22bacteraemias%22%5BAll+Fields%5D+OR+%22bacteremias%22%5BAll+Fields%5D%29+OR+%22bacillaemia%22%5BAll+Fields%5D%29+AND+%28%22nucleic+acid+amplification+techniques%22%5BMeSH+Terms%5D+OR+%28%22nucleic%22%5BAll+Fields%5D+AND+%22acid%22%5BAll+Fields%5D+AND+%22amplification%22%5BAll+Fields%5D+AND+%22techniques%22%5BAll+Fields%5D%29+OR+%22nucleic+acid+amplification+techniques%22%5BAll+Fields%5D+OR+%22naat%22%5BAll+Fields%5D+OR+%22PCR%22%5BAll+Fields%5D+OR+%22Xpert%22%5BAll+Fields%5D%29+AND+%28%22diagnosable%22%5BAll+Fields%5D+OR+%22diagnosi%22%5BAll+Fields%5D+OR+%22diagnosis%22%5BMeSH+Terms%5D+OR+%22diagnosis%22%5BAll+Fields%5D+OR+%22diagnose%22%5BAll+Fields%5D+OR+%22diagnosed%22%5BAll+Fields%5D+OR+%22diagnoses%22%5BAll+Fields%5D+OR+%22diagnosing%22%5BAll+Fields%5D+OR+%22diagnosis%22%5BMeSH+Subheading%5D%29&sort=relevance&size=200) which have been exported as a .nbib file (from above URL, [send to]-->[Citations Manager]-->[all results]-->[create file]) saved as *pubmed.nbib* in the working directory.  
+
+
+### Scopus
+
+[ *DB: Accepted practice when doing a systematic review is to search multiple databases. But this inevitably means searching a commercial database i.e. a database maintained by a for-profit organisation which requires a subscription. UoL has access to Scopus so have used this, but I find it less transparent how the search query works in Scopus.* ]  
+
+Scopus was searched with query:
+
+**( TITLE-ABS-KEY ( tuberculosis  AND  diagnosis )  AND  TITLE-ABS-KEY ( pcr  OR  naat  OR  xpert )  AND  TITLE-ABS-KEY ( blood  OR  mycobacteraemia  OR  bacteraemia  OR  bacillaemia  OR  "blood steam infection" ) ) **  
+
+Returning 537 results on 12/12/2020; these are exported as a .bib file using [select all-->BibTeX export, including abstract] saved as scopus.bib in the working directory.  
+
+### Combining search results, removing duplicates
+
+The .bib files are read in and combined, with duplicates identified by doi and removed:  
+
+[embedded code supressed]
+
+```{r}
+# read in & combine pubmed and scopus returned references
+pubmed_refs <- read_bibliography("pubmed.nbib")
+scopus_refs <- read_bibliography("scopus.bib")
+combined_refs <- merge_columns(pubmed_refs, scopus_refs)
+
+# identify duplicates and remove
+#### **** THIS CODE DOES NOT DO WHAT EXPECTED IT TO ****
+duplicated_dois <- find_duplicates(combined_refs, match_variable = "doi")
+refs <- extract_unique_references(combined_refs, duplicated_dois)
+
+# remedial fix to get the missed refs for screening from the unexpected output from above
+combined_refs %>%
+  distinct(doi, .keep_all = TRUE) -> combined_refs2
+setdiff(combined_refs2$doi, refs$doi) -> additional_refs
+
+combined_refs2 %>%
+  filter(
+    doi %in% additional_refs
+  ) -> refs2
+
+
+# limit to variables of interest
+refs %>%
+  dplyr::select(
+    author, journal, year,
+    document_type, doi, url, pubmed_id,
+    author_keywords, mesh_terms, keywords,
+    publication_type, title, abstract) -> refs
+
+refs2 %>%
+  dplyr::select(
+    author, journal, year,
+    document_type, doi, url, pubmed_id,
+    author_keywords, mesh_terms, keywords,
+    publication_type, title, abstract) -> refs2
+
+# write this out to the working directory:
+#write_csv(refs, "refs_for_screening.csv")
+#write_csv(refs2, "refs_for_screening2.csv")
+
+# keeping track of numbers for later flow diagram describing search
+pubmed_n = nrow(pubmed_refs)
+scopus_n = nrow(scopus_refs)
+for_screening_n = (nrow(refs) + nrow(refs2))
+duplicates_by_doi_n = (pubmed_n + scopus_n) - for_screening_n
+
+
+```  
+
+## Screening results
+
+```{r}
+## Title and abstract screening 
+
+# combine LB and DB abstract review results
+full_join(read_csv("refs_for_screening_LB.csv"),
+          read_csv("refs_for_screening_DB.csv"),
+          by = c(
+            "author", "journal", "year", "document_type",
+            "doi", "url", "pubmed_id", "author_keywords",
+            "mesh_terms", "keywords", "publication_type", 
+            "title", "abstract")
+          ) %>%
+  # variable indexing if either LB or DB wanted to review full text
+  mutate(review_fulltext = ifelse(
+    review_fulltext.x==1 | review_fulltext.y==1,
+    1, 0
+  )) %>%
+  filter(review_fulltext==1) %>%
+  dplyr::select(
+    author, journal, year,
+    document_type, doi, url, pubmed_id,
+    author_keywords, mesh_terms, keywords,
+    publication_type, title, abstract) -> df
+
+# second batch refs
+
+full_join(read_csv("refs_for_screening2_LB.csv"),
+          read_csv("refs_for_screening2_DB.csv"),
+          by = c(
+            "author", "journal", "year", "document_type",
+            "doi", "url", "pubmed_id", "author_keywords",
+            "mesh_terms", "keywords", "publication_type", 
+            "title", "abstract")
+          ) %>%
+  # variable indexing if either LB or DB wanted to review full text
+  mutate(review_fulltext = ifelse(
+    review_fulltext.x==1 | review_fulltext.y==1,
+    1, 0
+  )) %>%
+  filter(review_fulltext==1) %>%
+  dplyr::select(
+    author, journal, year,
+    document_type, doi, url, pubmed_id,
+    author_keywords, mesh_terms, keywords,
+    publication_type, title, abstract) -> df2
+
+#write_csv(df, "for_fulltext_review.csv")
+#write_csv(df2, "for_fulltext_review2.csv")
+
+```  
+
+```{r}
+
+df <- read_csv("review1.csv")
+df %>% 
+  filter(include==1) %>%
+  mutate(
+    ref = paste0(
+      word(author), "_", year
+    )
+  ) -> r1df
+
+#r1df %>%
+#  filter(ref %in% r1df$ref[duplicated(r1df$ref)]) %>%
+#  select(ref, sens, spec, N)
+df %>%
+  mutate(
+    exclusion_reason = case_when(
+      
+      excluded %in% c(
+        "Unclear how cases were selected for inclusion",
+        "Unclear how patients were selected for blood PCR",
+        "Included patients not prospectively defined",
+        "unclear how subgroup who got blood PCR were selected",
+        "Unclear how included patients not prospectively defined",
+        "unclear if included patients prospectively defined"
+        ) ~ "Patient selection not prospective or unclear",
+      
+      excluded %in% c(
+        "PCR not done on blood",
+        "Unclear if PCR done on blood",
+        "blood PCR not done",
+        "peripheral blood PCR not done",
+        "PCR not done on peripheral blood"
+      ) ~ "NAAT not performed on peripheral blood",
+      
+      excluded %in% c(
+        "Reference standard not given",
+        "There are 0 culture confirmed TB cases in the 14 patients who had blood PCR",
+        "Reference standard unclear",
+        "Unclear reference standard"
+      ) ~ "Reference standard absent or unclear",
+      
+      excluded %in% c(
+        "preregistration of study",
+        "survey",
+        "not primary data",
+        "case report",
+        "review",
+        "spiked sample study",
+        "True and false positive and negative results not reported"
+      ) ~ "Non-eligible study design",
+      
+      excluded == "duplicate" ~ "Duplicate reference"
+    )
+  ) -> df
+
+pubmed_n = pubmed_n
+scopus_n = scopus_n
+for_screening_n = for_screening_n
+duplicates_by_doi_n = duplicates_by_doi_n
+fulltext_review_n = nrow(df)
+excl_by_abstract_n = for_screening_n - fulltext_review_n
+included_r1_n = nrow(r1df)
+unique_pubs_n = length(unique(r1df$ref))
+twopcrmethods_n = sum(duplicated(r1df$ref))
+df %>% filter(include==0) %>%
+    count(exclusion_reason) -> excl_n_tbl
+```  
+
+```{r prisma_flow_diagram}
+tibble(x= seq(10,130,length.out = 100),
+       y= seq(1, 100, length.out = 100)) %>%
+  ggplot(aes(x,y))+
+  scale_x_continuous(minor_breaks = seq(10, 130, 10)) +
+  scale_y_continuous(minor_breaks = seq(10, 100, 10)) +
+  theme_void() +
+  geom_rect(xmin = 18, xmax=48, ymin=92, ymax=102, color='black',
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 33, y=97,
+           label= paste0(pubmed_n, ' studies from\nPubMed search'),
+           size=2.5) +
+  geom_rect(xmin = 52, xmax=82, ymin=92, ymax=102, color='black',
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 67, y=97,
+           label= paste0(scopus_n, ' studies from\nScopus search'),
+           size=2.5) +
+  geom_rect(xmin = 68, xmax=98, ymin=80, ymax=90, color='black',
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 83, y=85,
+           label= paste0(duplicates_by_doi_n, ' duplicates by\nautomated search'),
+           size=2.5) +
+  geom_rect(xmin = 33, xmax=67, ymin=68, ymax=78, color='black',
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 50, y=73,
+           label= paste0(for_screening_n, ' for manual\ntitle/abstract screen'),
+           size=2.5) +
+  geom_rect(xmin = 68, xmax=98, ymin=56, ymax=66, color='black',
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 83, y=61,
+           label= paste0(excl_by_abstract_n, ' excluded by\ntitle/abst review'),
+           size=2.5) +
+  geom_rect(xmin = 33, xmax=67, ymin=44, ymax=54, color='black',
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 50, y=49,
+           label= paste0(fulltext_review_n, ' for manual\nfull-text review'),
+           size=2.5) +
+  geom_rect(xmin = 68, xmax=130, ymin=10, ymax=42, color='black',
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 70, y=25,
+           label= paste0(
+             "Excluded, ", sum(excl_n_tbl[,2]), ":      \n",
+             excl_n_tbl[1,1], " = ", excl_n_tbl[1,2], "\n",
+             excl_n_tbl[2,1], " = ", excl_n_tbl[2,2], "\n",
+             excl_n_tbl[3,1], " = ", excl_n_tbl[3,2], "\n",
+             excl_n_tbl[4,1], " = ", excl_n_tbl[4,2], "\n",
+             excl_n_tbl[5,1], " = ", excl_n_tbl[5,2], "\n"
+           ),
+           size=2.5, hjust=0) +
+  geom_rect(xmin = 30, xmax=105, ymin=-4, ymax=8, color='black',
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 32, y=2,
+           label= paste0(
+             "Included, ", included_r1_n,
+             " uses of NAAT on blood to diagnose TB\n",
+             "reported in ", unique_pubs_n, " studies ",
+             "(", twopcrmethods_n, " papers reported 2 NAAT methods)"
+           ),
+           size=2.5, hjust=0) +
+  geom_segment(
+    x=50, xend=50, y=84, yend=78.5, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) +
+  geom_segment(
+    x=50, xend=50, y=68, yend=54.5, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) +
+  geom_segment(
+    x=50, xend=50, y=44, yend=8.5, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) +
+  geom_segment(
+    x=50, xend=67.5, y=84, yend=84, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) +
+  geom_segment(
+    x=50, xend=67.5, y=64, yend=64, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) +
+  geom_segment(
+    x=50, xend=67.5, y=34, yend=34, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) +
+  geom_segment(
+    x=37, xend=63, y=88, yend=88, 
+    size=0.15, linejoin = "mitre", lineend = "butt") +
+  geom_segment(
+    x=50, xend=50, y=78, yend=88, 
+    size=0.15, linejoin = "mitre", lineend = "butt") +
+  geom_segment(
+    x=37, xend=37, y=88, yend=92, 
+    size=0.15, linejoin = "mitre", lineend = "butt") +
+  geom_segment(
+    x=63, xend=63, y=88, yend=92, 
+    size=0.15, linejoin = "mitre", lineend = "butt") -> r1_flow
+  
+```  
+
+Summary of identified, screened, eligible and included study shown in PRISMA flow diagram in figure 1. 
+
+```{r PRISMA_1, fig.cap="PRISMA flow chart for systematic review 1"}
+
+r1_flow
+
+```  
+
+
+
+```{r descriptive_figures}
+
+r1df %>%
+  count(design) %>%
+  ggplot(
+    aes(reorder(design,n), n)
+  ) +
+  geom_bar(
+    stat="identity",
+    colour="black", alpha=0.5, fill=viridis(10)[5]) +
+  coord_flip() +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Study design") -> g1
+
+r1df %>%
+  count(included_cat) %>%
+  ggplot(
+    aes(reorder(included_cat,n), n)
+  ) +
+  geom_point(size=2, colour=viridis(10)[5]) +
+  coord_flip() +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Included population or cases") -> g2
+
+r1df %>%
+  count(setting) %>%
+  ggplot(
+    aes(reorder(setting,n), n)
+  ) +
+  geom_point(size=3, colour=viridis(10)[5]) +
+  coord_flip() +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Setting") -> g3
+
+r1df %>%
+  count(age) %>%
+  ggplot(
+    aes(reorder(age,n), n)
+  ) +
+  geom_bar(
+    stat="identity",
+    colour="black", alpha=0.5, fill=viridis(10)[5]) +
+  coord_flip() +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Age group") -> g4
+
+r1df %>%
+  mutate(hiv = as.numeric(hiv)) %>%
+  ggplot(
+    aes(hiv)
+  )+
+  geom_histogram(colour="black",
+                 fill=viridis(10)[5], alpha=0.5) +
+  theme_dab() +
+  xlab("") + ylab("") +
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Proportion HIV +") -> g5
+
+
+r1df %>%
+  count(bias_risk) %>%
+  mutate(bias_risk = factor(
+    bias_risk,
+    levels = c("high", "moderate", "low"))) %>%
+  ggplot(
+    aes(bias_risk, n)
+  ) +
+  geom_bar(
+    stat="identity",
+    colour="black", alpha=0.5, fill=viridis(10)[10]) +
+  coord_flip() +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Assessed risk of bias") -> g6
+
+r1df %>%
+  mutate(
+    preprocess = case_when(
+      preprocessing %in% c(
+        "buffy coat extraction",
+        "PBMC isolation",
+        "Buffy coat extraction"
+                           ) ~ "PBMC/buffy extraction",
+      preprocessing %in% c(
+        "DNA extraction protocol direct on whole blood",
+        "QIAGEN commercial kit for DNA extraction used directly on whole blood",
+        "none",
+        "none, direct DNA extraction on whole blood"
+      ) ~ "Direct DNA extraction on whole blood",
+      preprocessing %in% c(
+        "lysis-centrifugation",
+        "Red cell lysis and centrifugation",
+        "Red cell lysis",
+        "RBC lysis and concentration without wash",
+        "Commercial lysis and eukaryotic DNA degradation kit (MolLysis)"
+      ) ~ "Lysis-concentration",
+      preprocessing %in% c(
+        "plasma"
+      ) ~ "Plasma extraction",
+      preprocessing %in% c(
+        "Lysis-centrifugation and wash",
+        "SDS lysis, centriffugation, wash procedure"
+      ) ~ "Lysis-concentration-wash",
+      preprocessing %in% c(
+        "unclear"
+      ) ~ "Unclear",
+    )
+  ) -> r1df
+
+
+r1df %>%
+  count(preprocess) %>%
+  ggplot(
+    aes(reorder(preprocess,n), n)
+  ) +
+  geom_point(size=3, colour=viridis(10)[2]) +
+  coord_flip() +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Pre-processing of blood") -> g7
+
+ 
+r1df %>%
+  mutate(
+    naat_method = case_when(
+      naat %in% c(
+        "in house IS6110 pcr",
+        "in house PCR IS6110",
+        "in houe nested PCR IS6110",
+        "in hous IS6110",
+        "in house nested PCR IS6110",
+        "IS6110 pcr",
+        "in house IS6110 PCR", 
+        "IS6110 PCR"
+      ) ~ "In house qPCR or nested PCR IS6110",
+      naat %in% c(
+        "QX100 Droplet Digital PCR System(Bio-Rad, California, USA) IS6110",
+        "digital droplet PCR IS6110",
+        "digital droplet IS6110 pcr"
+      ) ~ "ddPCR IS6110",
+      naat %in% c(
+        "(in house?) IS1081 primer PCR",
+        "in house IS1081 PCR"
+      ) ~ "qPCR IS1081",
+      naat %in% c(
+        "AcuGen commercial PCR kit IS6110"
+      ) ~ "AcuGen commercial PCR",
+      naat %in% c(
+        "in house PCR pPH7301-clon, protein MBP64, IS6110"
+      ) ~ "multitarget qPCR pPH7301, MBP64, IS6110",
+      naat %in% c(
+        "Amplifed Mycobacterium Tuberculosis Direct Test (AMTDT; Gen-Probe Inc., San Diego, Calif.)"
+      ) ~ "Gen-probe commercial PCR",
+      naat %in% c(
+        "Xpert MTB/Rif"
+      ) ~ "Xpert MTB/Rif commercial PCR",
+      naat %in% c(
+        "IS6110 qPCR TaqMan Array Card", 
+        "IS6110 TaqMan"
+      ) ~ "TaqMan PCR IS6110",
+      naat %in% c(
+        "16s rRNA PCR"
+      ) ~ "16s rRNA PCR",
+      naat %in% c("in house MPT64") ~ "qPCR MPT64",
+      naat %in% c("in house IS986") ~ "qPCR IS986",
+      naat %in% c(
+        "Hain Lifescience FluoroType MTB IS6110") ~ "Hain FluoroType MTB commercial PCR",
+      naat %in% c("digital droplet PCR gyrB") ~ "ddPCR gyrB",
+      naat %in% c("digital droplet IS1081 pcr") ~ "ddPCR IS1081"
+    )
+  ) -> r1df
+
+
+r1df %>%
+  count(naat_method) %>%
+  ggplot(
+    aes(reorder(naat_method,n), n)
+  ) +
+  geom_point(size=3, colour=viridis(10)[2]) +
+  coord_flip() +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("NAAT method") -> g8
+
+
+r1df %>%
+  ggplot(
+    aes(year)
+  ) +
+  geom_histogram(
+    colour="black", fill=viridis(10)[5], alpha=0.5,
+    binwidth = 2
+  ) +
+  theme_dab() +
+  xlab("") + ylab("") +
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Publication year") -> g9
+
+r1df %>%
+  ggplot(
+    aes(as.numeric(volume_ml))
+  ) +
+  geom_histogram(
+    colour="black", fill=viridis(10)[2], alpha=0.5,
+    binwidth = 1
+  ) +
+  theme_dab() +
+  xlab("") + ylab("") +
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Blood volume (ml)") -> g10
+  
+r1df %>%
+  mutate(
+    region1 = case_when(
+      region %in% c("USA") ~ "North America",
+      region %in% c("Japan", "China") ~ "East Asia",
+      region %in% c("India") ~ "South Asia",
+      region %in% c("Spain", "Germany", "Italy", "France") ~ "Europe",
+      region %in% c("Turkey", "Iran") ~ "West Asia",
+      region %in% c("Argentina", "Brazil") ~ "South America",
+      region %in% c("Sudan", "Tanzania", "Kenya",
+                    "Uganda", "Tanzania, Uganda",
+                    "South Africa", "Malawi") ~ "Sub Saharan Africa",
+      region %in% c("unclear!") ~ "Unclear",
+
+          )
+  ) -> r1df
+
+
+r1df %>%
+  count(region1) %>%
+  ggplot(
+    aes(reorder(region1,n), n)
+  ) +
+  geom_point(size=3, colour=viridis(10)[5]) +
+  coord_flip() +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Study region") -> g11
+
+
+
+r1df %>%
+  mutate(
+    controls = case_when(
+      control %in% c(
+        "suspected pulmonary TB but sputum culture negative and alternative diagnosis made",
+        "Patienst with final diagnosis of malignant or reactive lymphadenopathy",
+        "Pateints with negative sputum investigations for PTB",
+        "PTB samples negative fo MTB and an alternative diagnosis made (groups 1 and 2 in study description); group 3 (culture negative but no other diagnosis made and responded to TB therapy) are excluded from extracted figures",
+        "Initially suspected TB but final diagnosis not TB (have extracted - there are also healthy controls whch have removed)",
+        "Final diagnosis not TB",
+        "Those with final non-TB diagnosis",
+        "Patients with non-TB diagnosis. Indeterminate cases were excluded.",
+        "Patients with a final diagnosis not TB",
+        "Subsequent sputum TB culture negative result"
+      ) ~ "Symptomatic patients in whom TB was excluded",
+      control %in% c(
+        "healthy controls",
+        "healthy persons",
+        "Healthy controls with normal CXR and negative PPD",
+        "Healthy controls",
+        "Health controls",
+        "HIV negative healthy volunteers",
+        "healthy volunteers"
+      ) ~ "Healthy volunteers",
+      control %in% c(
+        "Blood culture negative or blood culture positive for mycobacteria other than tuberculosis",
+        "TB blood culture negative patients",
+        "Those that were TB blood culture negative"
+      ) ~ "Patients with negative TB blood culture",
+      control %in% c(
+        "Health controls and patients suspected of having tuberculosis but negative cultures",
+        "Patients with alternative diagnosis and healthy volunteers"
+        
+      ) ~ "Mixed",
+      control %in% c("none") ~ "No control group",
+      is.na(control) ~ "Not stated"
+    )
+  ) -> r1df
+
+r1df %>%
+  count(controls) %>%
+  ggplot(
+    aes(reorder(controls,n), n)
+  ) +
+  geom_point(size=3, colour=viridis(10)[5]) +
+  coord_flip() +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Controls") -> g12
+  
+
+r1df %>%
+  ggplot(
+    aes(n_TB/N)
+  ) +
+  geom_histogram(
+    colour="black", fill=viridis(10)[5], alpha=0.5,
+    binwidth = 0.1) +
+  theme_dab() +
+  xlab("") + 
+  theme(plot.title = element_text(size = 10, face = "bold")) +
+  ggtitle("Proportion TB") -> g13
+
+
+
+```  
+
+## Description of included studies
+
+Characteristics of review 1 included studies are shown in figure 2 (study design, setting, patient population/cases, assessed risk of bias) and figure 3 (NAAT methods).  A wide variety of study designs, patient populations and NAAT methods have been reported, with little replication of specific approaches. Initial reports of blood NAAT for TB diagnosis had a peak in the 1990s then a relative hiatus, followed by an incresae again in last 10 years. 
+
+```{r figure_2, fig.cap="Description of review 1 included studies: study design, setting, patient population/cases, assessed risk of bias.", fig.width=8}
+
+(g1 | g3 | g4) / 
+(g9 | g5 | g6) / 
+(g11 | g12) +
+  plot_layout(heights = c(1,1,1.5))
+```  
+
+```{r figure_3, fig.cap="Description of review 1 included studies: NAAT methods used."}
+g8 / (g7|g10) +
+  plot_layout(heights = c(1.5,1))
+
+```  
+
+
+```{r}
+
+r1df %>%
+  ggplot(
+    aes(1-spec, sens)
+  ) +
+  geom_point(aes(size=n_TB),
+             shape=21, alpha=0.2,
+             colour="black", fill="grey") +
+  theme_dab() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g1
+
+
+r1df %>%
+  ggplot(aes(1-spec, sens,fill=design)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_viridis_d() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g2
+
+r1df %>%
+  ggplot(aes(1-spec, sens,fill=setting)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_viridis_d() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g3
+
+r1df %>%
+  ggplot(aes(1-spec, sens,fill=age)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_viridis_d() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g4
+
+r1df %>%
+  ggplot(aes(1-spec, sens,fill=year)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_viridis_c() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g5
+
+r1df %>%
+  ggplot(aes(year, sens)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() +
+  geom_smooth(mapping = aes(weight = n_TB)) -> g5.1
+
+r1df %>%
+  ggplot(aes(1-spec, sens,fill=hiv>0.5)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_viridis_d() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g6
+
+r1df %>%
+  mutate(bias_risk = factor(
+    bias_risk,
+    levels = c("low", "moderate", "high"))) %>%
+  ggplot(aes(1-spec, sens,fill=bias_risk)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_viridis_d() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g7
+
+r1df %>%
+  ggplot(aes(1-spec, sens,fill=region1)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_ptol() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g8
+
+r1df %>%
+  ggplot(aes(1-spec, sens,fill=controls)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_ptol() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g9
+
+r1df %>%
+  mutate(
+    blood_volume = cut(
+      as.numeric(volume_ml),
+      breaks = c(0, 0.5, 2,5,20.1))
+  ) %>%
+  ggplot(aes(1-spec,
+             sens,fill=blood_volume)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_ptol() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g10
+
+r1df %>%
+  ggplot(aes(1-spec, sens,fill=preprocess)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_ptol() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g11
+
+
+r1df %>%
+  mutate(
+    `Xpert MTB/Rif` = naat_method=="Xpert MTB/Rif commercial PCR"
+  ) %>%
+  ggplot(aes(1-spec, sens,fill=`Xpert MTB/Rif`)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_ptol() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g12
+
+r1df %>%
+  mutate(
+    `commercial PCR` = str_detect(naat_method, pattern = "commercial")
+  ) %>%
+  ggplot(aes(1-spec, sens,fill=`commercial PCR`)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + scale_fill_viridis_d() +
+  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g13
+
+
+g1 <- g1 + theme(legend.position = "top") + guides(fill=guide_legend(nrow=2,byrow=TRUE))
+g2 <- g2 + theme(legend.position = "top") + guides(fill=guide_legend(nrow=2,byrow=TRUE))
+g3 <- g3 + theme(legend.position = "top") + guides(fill=guide_legend(nrow=2,byrow=TRUE))
+g4 <- g4 + theme(legend.position = "top") + guides(fill=guide_legend(nrow=2,byrow=TRUE))
+g5 <- g5 + theme(legend.position = "top") + guides(fill=guide_legend(nrow=2,byrow=TRUE))
+g6 <- g6 + theme(legend.position = "top") + guides(fill=guide_legend(nrow=2,byrow=TRUE))
+g7 <- g7 + theme(legend.position = "top") + guides(fill=guide_legend(nrow=2,byrow=TRUE))
+
+```  
+
+## Descriptive summaries of reported diagnostic performance
+
+Reported diagnostic performance in included studies are shown in figure 4-6. There are several striking findings. First, there is very marked heterogeneity in sensitivity (ranging from 0 to 100%), with very little evidence of correlation between sensitivity and specificity. Heterogeneity in sensitivity seems unrelated to study design, setting, HIV prevalance in study, or NAAT methods (blood volume, method of blood preprocessng) other than the finding that the studies using Xpert Rif/MTB had amongst the lowest reported sesnitivities. Average reported sensitivity of blood NAAT seems to have slightly decreased over time since initial reports in 1990s.  
+
+However, reported sensitivity does appear to vary somewhat by assessed risk of bias, with studies assessed as lower risk of bias, and larger studies, reporting lower sensitivity.  
+
+There is also evidence of reporting bias with an asymetrical funnel plot suggesting smaller studies with high sensitivity are over represented (figure 7).  
+
+```{r figure_4, fig.cap="Reported diagnostic performance (sens v 1-spec, blood NAAT for TB diagnosis, raw data, review 1) by study characteristic covariates", fig.height=10, fig.width=8}
+
+(g1 | g2 | g3) /
+    (g4 | g5 | g6) /
+    (g9 | g7)
+```  
+
+```{r figure_5, fig.cap="Reported diagnostic performance (sens v 1-spec, blood NAAT for TB diagnosis, raw data, review 1) by study NAAT methodology", fig.height=8, fig.width=6}
+(g11 / g10 / g12)
+```  
+
+
+```{r, results='hide'}
+
+
+r1df %>%
+  mutate(
+    year = as.numeric(year)
+  ) %>%
+  ggplot(aes(year, sens)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  geom_smooth(span=1.3, colour=viridis(8, option = "C")[5]) +
+  theme_dab() -> g1
+
+r1df %>%
+  mutate(
+    hiv = as.numeric(hiv)
+  ) %>%
+  ggplot(aes(hiv, sens)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  geom_smooth(colour=viridis(8, option = "C")[5]) +
+  theme_dab() -> g2
+
+
+r1df %>%
+  ggplot(aes(n_TB, sens)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  geom_smooth(
+    mapping = aes(weight = n_TB),
+    colour=viridis(8, option = "C")[5],
+    span=1.5
+    ) + xlab("Sample size (n TB)") +
+  theme_dab() -> g9
+
+
+r1df %>%
+  ggplot(
+    aes(setting, sens)
+  ) +
+  geom_point(aes(size=n_TB),
+             fill="black",
+             shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + coord_flip() -> g3
+
+r1df %>%
+  ggplot(
+    aes(age, sens)
+  ) +
+  geom_point(aes(size=n_TB),
+             fill="black",
+             shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + coord_flip() -> g4
+
+
+r1df %>%
+  mutate(
+    bias_risk = ifelse(bias_risk=="low",
+                       "Low", "High/mod")) %>%
+  ggplot(
+    aes(bias_risk, sens)
+  ) +
+  geom_beeswarm(aes(size=n_TB),
+             fill=viridis(10, option="D")[8],
+             shape=21, alpha=0.5) +
+  geom_boxplot(width=0.7, fill="white", alpha=0.3) +
+  guides(size=FALSE) +
+  theme_dab() -> g5
+
+r1df %>%
+  mutate(
+    blood_volume = as.numeric(volume_ml)
+  ) %>%
+  ggplot(aes(log(blood_volume), sens)) +
+  geom_point(aes(size=n_TB), shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  geom_smooth(span=1.3, colour=viridis(8, option = "C")[5]) +
+  theme_dab() -> g6
+
+r1df %>%
+  ggplot(
+    aes(naat_method, sens)
+  ) +
+  geom_point(aes(size=n_TB),
+             fill="black",
+             shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + coord_flip() -> g7
+
+r1df %>%
+  ggplot(
+    aes(preprocess, sens)
+  ) +
+  geom_point(aes(size=n_TB),
+             fill="black",
+             shape=21, alpha=0.5) +
+  guides(size=FALSE) +
+  theme_dab() + coord_flip() -> g8
+
+
+
+r1df %>%
+  mutate(
+    d = n_TB,
+    n = trunc(sens*n_TB),
+    low_bias_risk = bias_risk=="low"
+    ) %>%
+  dplyr::select(
+    ref, low_bias_risk, bias_risk, n, d
+  ) -> r1nd
+
+
+fit1 <- brm(
+  data = r1nd, family = binomial,
+  n | trials(d) ~ low_bias_risk + (1|ref),
+  cores=4, chains=2, iter=4000, seed = 140916
+  )
+
+
+nd = data.frame(
+  ref = "ref_x",
+  low_bias_risk = TRUE,
+  d = 1:200
+)
+max_iter = 1e3
+
+posterior_predict(
+  fit1,
+  newdata = nd,
+  re_formula = NA,
+  subset = 1:max_iter,
+  seed = 140916
+) %>%
+  as_tibble() %>%
+  pivot_longer(1:200) %>%
+  mutate(d = rep(1:200, max_iter)) %>%
+  summarise(expected_sens = mean(value/d)) -> expected_sens
+
+posterior_predict(
+  fit1,
+  newdata = nd,
+  re_formula = NA,
+  subset = 1:max_iter,
+  seed = 140916
+) %>%
+  as_tibble() %>%
+  pivot_longer(1:200) %>%
+  mutate(d = rep(1:200, max_iter),
+         proportion = value/d) %>%
+  group_by(d) %>%
+  summarise(
+    lwr80 = quantile(proportion, probs = 0.1),
+    upr80 = quantile(proportion, probs = 0.9),
+    lwr95 = quantile(proportion, probs = 0.025),
+    upr95 = quantile(proportion, probs = 0.975)
+  ) -> funnel_df
+
+
+ggplot() +
+  geom_point(
+    data=r1nd %>% mutate(
+      sample_size=d,
+      bias_risk = factor(bias_risk,
+                         levels = c("low", "moderate", "high"))
+      ),
+    aes(
+      x=d, y=n/d, size=sample_size, fill=bias_risk
+    ),
+    shape=21, alpha=0.5
+  ) +
+  geom_smooth(
+    data=funnel_df,
+    aes(
+      x=d, y=lwr80
+    ),
+    se=FALSE, colour="black", linetype=2
+  ) +
+  geom_smooth(
+    data=funnel_df,
+    aes(
+      x=d, y=upr80
+    ),
+    se=FALSE, colour="black", linetype=2
+  ) +
+  geom_smooth(
+    data=funnel_df,
+    aes(
+      x=d, y=lwr95
+    ),
+    se=FALSE, colour="black", linetype=3
+  ) +
+  geom_smooth(
+    data=funnel_df,
+    aes(
+      x=d, y=upr95
+    ),
+    se=FALSE, colour="black", linetype=3
+  ) +
+  geom_hline(yintercept = as.numeric(expected_sens)) +
+  theme_dab() + scale_fill_viridis_d() +
+  xlab("Sample size (n TB cases)") +
+  ylab("Sensitivity of blood NAAT") -> g_funnelplot
+
+
+```  
+
+```{r figure_6, fig.cap="Reported sensitivity of blood NAAT for TB diagnosis (review 1, raw data) by selected covariates", fig.height=9, fig.width=6}
+
+((g1 / g2 / g6) | (g9 / g5 / g3)) / 
+(plot_spacer() | (g7 / g8))
+```  
+
+```{r figure_7, fig.cap="Evidence of bias in design and reporting versus reported sensitivity of blood NAAT for TB diagnosis (review 1).", fig.width=4.5, fig.height=3.5}
+g_funnelplot
+```  
+
+## Bivariate regression modelling 
+
+```{r}
+
+### reorganising the data frame to have TP, FN TN, FP columns
+# and for studies with more than 1 NAAT method reported index these 
+# so the second gets a prefix "B"
+r1df %>%
+  group_by(ref) %>%
+  mutate(subindex = row_number(ref)) %>%
+  ungroup() %>%
+  mutate(
+    TP = trunc(sens * n_TB),
+    FN = trunc((1-sens) * n_TB),
+    TN = trunc(spec * (N - n_TB)),
+    FP = trunc((1-spec) * (N - n_TB)),
+    risk_bias = ifelse(bias_risk=="low", "Low", "High/Mod"),
+    ref = ifelse(subindex>1,
+                 paste0(ref, "_", LETTERS[subindex]),
+                 ref)
+  ) %>%
+  dplyr::select(ref,
+         year, hiv, risk_bias, # these are main covariates we want to test
+         TP, FN, TN, FP) -> r1df_reduced
+
+# remove studies with no specificity data 
+r1df_reduced %>%
+  filter(!is.na(TN)) -> r1df_reduced_cc
+```  
+
+```{r, include=FALSE, eval=FALSE}
+
+### Bivariate meta-analysis using mada package
+# forest plots
+forest(
+  madad(r1df_reduced_cc),
+  "sens",
+  snames = r1df_reduced_cc$ref,
+  main="Sensitivity"
+)
+
+forest(
+  madad(r1df_reduced_cc),
+  "spec",
+  snames = r1df_reduced_cc$ref,
+  main="Specificity"
+)
+
+# bivariate plots
+crosshair(r1df_reduced_cc)
+ROCellipse(r1df_reduced_cc)
+
+# bivariate regression fit
+# with no covariates
+fit0 <- reitsma(r1df_reduced_cc)
+# with rik of bias covariate (meta regression)
+fit1 <- reitsma(r1df_reduced_cc,
+                     formula = cbind(tsens,tfpr) ~ risk_bias)
+
+plot(fit0)
+plot(fit1)
+summary(fit1) # bias risk is a "significant" covariate 
+```  
+
+```{r, results='hide', fig.show='hide'}
+
+### Similar bivariate regression meta analysis but using brms 
+# this fits using Baysian MCMC approach and allow more flexibility
+# and control over outputs etc.
+
+
+## the data frame has to be reformated so that every study is a 2x2 table
+## ie each study over two rows in the df
+r1df_reduced_cc %>%
+  dplyr::select(ref, year, hiv, risk_bias,
+         P_yes = TP, N_yes = FN,
+         P_no = FP, N_no = TN) %>%
+  pivot_longer(5:8) %>%
+  separate(name, c("pos_neg", "TB")) %>%
+  pivot_wider(id_cols = c("ref", "TB", "year", "hiv", "risk_bias"),
+              names_from = pos_neg,
+              values_from = value) %>%
+  mutate(total = P + N) -> r1df_2x2
+
+
+# Fit a bivariate model with random effects by study, but no covariates 
+fit0 <- brm(
+  P | trials(total) ~ 0 + TB +(0 + TB | ref),
+  data = r1df_2x2,
+  family = binomial()
+)
+
+### visualising the model fit 
+# 95% cred interval ellipse
+brms::posterior_samples(fit0) %>%
+    as_tibble() %>%
+    dplyr::select(b_TBno,
+                  b_TByes) -> fit0df
+
+dataEllipse(x = fit0df$b_TBno,
+            y = fit0df$b_TByes,
+            levels = 0.95) %>% as_tibble() -> fit0_ci95contour
+
+
+# and 95% prediction intervals
+nd = data.frame(
+  total = 1e3,
+  ref = "ref_x",
+  TB = c("yes", "no")
+)
+
+posterior_predict(
+  fit0,
+  newdata = nd,
+  re_formula = P | trials(total) ~ 0 + TB +(0 + TB | ref),
+  allow_new_levels=TRUE,
+  subset = 1:1e3,
+  seed = 140916
+) %>% as_tibble() %>%
+  transmute(
+    sens = V1/1e3,
+    fpr = V2/1e3
+  ) %>%
+  summarise(
+    sens_median = quantile(sens, probs = 0.5),
+    sens_l90pi = quantile(sens, probs = 0.05),
+    sens_u90pi = quantile(sens, probs = 0.95),
+    fpr_median = quantile(fpr, probs = 0.5),
+    fpr_l90pi = quantile(fpr, probs = 0.05),
+    fpr_u90pi = quantile(fpr, probs = 0.95)
+  ) -> fit0_pi90
+
+
+# plot these on the raw data
+ggplot() +
+  geom_point(
+    data = r1df,
+    aes(1-spec, sens, size=n_TB),
+    alpha=0.05
+  ) +
+  geom_polygon(
+    aes(inv_logit_scaled(x), inv_logit_scaled(y)),
+    data=fit0_ci95contour,
+    size=0.5,
+    alpha=0.6,
+    fill=viridis(10, option = "magma")[6],
+    colour=NA) +
+  geom_errorbarh(
+    data = fit0_pi90,
+    aes(
+      x = fpr_median,
+      y=sens_median,
+      xmin = fpr_l90pi,
+      xmax = fpr_u90pi
+    ),
+    height = 0.02,
+    colour=viridis(10, option = "magma")[6]
+  ) +
+  geom_errorbar(
+    data = fit0_pi90,
+    aes(
+      x = fpr_median,
+      y=sens_median,
+      ymin = sens_l90pi,
+      ymax = sens_u90pi
+    ),
+    width = 0.02,
+    colour=viridis(10, option = "magma")[6]
+  ) +
+  theme_dab() +
+  theme(legend.position = "none") +
+  xlim(-0.05,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g_fit0
+
+# also forest plots from fit0 model
+r1df_2x2 %>%
+  bind_cols(fitted(fit0) %>% as_tibble()) %>%
+  transmute(ref = ref,
+            TB = ifelse(TB=="yes",
+                        "Sensitivity",
+                        "1-specificity"),
+            total = total,
+            Estimate = Estimate/total,
+            Q2.5 = Q2.5/total,
+            Q97.5 = Q97.5/total) %>%
+  ggplot(
+    aes(ref, Estimate, 
+        ymin = Q2.5, ymax = Q97.5)
+  ) +
+  geom_point() +
+  geom_errorbar() +
+  facet_wrap(~TB) +
+  coord_flip() +
+  theme_dab() + ylab("") + xlab("") -> g_forest
+```  
+
+Formal bivariate modelling of the reported sensitivities and specificities largely confirms impressions from descriptive plots in previous section. Heterogeneity in reported sensitivity is extreme, with the 90% prediction interval (in which the model estimates 90% of studies from the "population" of studies will lie) encompassing nearly all possible values of sensitivity (90%PI = `r signif(as.numeric(fit0_pi90$sens_l90pi),2)` to `r signif(as.numeric(fit0_pi90$sens_u90pi),2)`).  
+
+```{r figure_8, fig.cap="Bivariate random-effects modelling reported sensitivity and specificity blood NAAT for TB diagnosis (review 1). Forest plots show model estimates of mean values with 95% credibility intervals for each study. Lower plot shows 95% credibility ellipse for mean (expected) values, with 90% prediction intervals in which 90% of studies are expected to lie.", fig.width=5, fig.height=7}
+g_forest / (g_fit0) + plot_layout(heights = c(2,1))
+```
+
+
+```{r, results='hide', fig.show='hide'}
+
+### models investigating covariates
+
+### bias risk 
+fit_bias <- brm(
+  P | trials(total) ~ 0 + TB + TB:risk_bias + 
+    (0 + TB | ref),
+  data = r1df_2x2,
+  family = binomial()
+)
+
+### visualising the model fit 
+
+# 95% credible interval ellipse
+brms::posterior_samples(fit_bias) %>%
+    as_tibble() %>%
+    transmute(
+      fpr_high = b_TBno,
+      fpr_low = b_TBno + `b_TBno:risk_biasLow`,
+      sens_high = b_TByes,
+      sens_low = b_TByes + `b_TByes:risk_biasLow`
+      ) -> fit_bias_df
+
+dataEllipse(x = fit_bias_df$fpr_high,
+            y = fit_bias_df$sens_high,
+            levels = 0.95) %>% as_tibble() -> high_bias_contour
+
+dataEllipse(x = fit_bias_df$fpr_low,
+            y = fit_bias_df$sens_low,
+            levels = 0.95) %>% as_tibble() -> low_bias_contour
+
+# and 90% prediction intervals
+
+nd = data.frame(
+  total = 1e3,
+  ref = "ref_x",
+  TB = c("yes", "no", "yes", "no"),
+  risk_bias = c("High/Mod", "High/Mod", "Low", "Low")
+)
+
+posterior_predict(
+  fit_bias,
+  newdata = nd,
+  re_formula = 
+    P | trials(total) ~ 0 + TB + TB:risk_bias + (0 + TB | ref),
+  allow_new_levels=TRUE,
+  subset = 1:1e3,
+  seed = 140916
+) %>% as_tibble() %>%
+  transmute(
+    sens_high = V1/1e3,
+    fpr_high = V2/1e3,
+    sens_low = V3/1e3,
+    fpr_low = V4/1e3
+  ) %>%
+  summarise(
+    sens_high_median = quantile(sens_high, probs = 0.5),
+    sens_high_l90pi = quantile(sens_high, probs = 0.05),
+    sens_high_u90pi = quantile(sens_high, probs = 0.95),
+    fpr_high_median = quantile(fpr_high, probs = 0.5),
+    fpr_high_l90pi = quantile(fpr_high, probs = 0.05),
+    fpr_high_u90pi = quantile(fpr_high, probs = 0.95),
+    
+    sens_low_median = quantile(sens_low, probs = 0.5),
+    sens_low_l90pi = quantile(sens_low, probs = 0.05),
+    sens_low_u90pi = quantile(sens_low, probs = 0.95),
+    fpr_low_median = quantile(fpr_low, probs = 0.5),
+    fpr_low_l90pi = quantile(fpr_low, probs = 0.05),
+    fpr_low_u90pi = quantile(fpr_low, probs = 0.95)
+  ) -> fit_bias_pi90
+
+# plot these on the raw data
+ggplot() +
+  geom_point(
+    data = r1df %>%
+      mutate(
+        risk_bias = ifelse(
+          bias_risk=="low",
+          "Low", "High/mod")
+      ),
+    aes(1-spec, sens, size=n_TB, colour=risk_bias),
+    alpha=0.2
+  ) +
+  geom_polygon(
+    aes(
+      inv_logit_scaled(x),
+      inv_logit_scaled(y)
+      ),
+    data=low_bias_contour,
+    fill=viridis(10)[9],
+    alpha=0.4, colour=NA) +
+  geom_polygon(
+    aes(
+      inv_logit_scaled(x),
+      inv_logit_scaled(y)
+      ),
+    data=high_bias_contour,
+    fill=viridis(10)[4],
+    alpha=0.5, colour=NA) +
+  geom_errorbar(
+    data = fit_bias_pi90,
+    aes(
+      x = fpr_high_median,
+      y = sens_high_median,
+      ymin = sens_high_l90pi,
+      ymax = sens_high_u90pi
+    ),
+    width=0.02, colour=viridis(10)[4]
+  ) +
+  geom_errorbarh(
+    data = fit_bias_pi90,
+    aes(
+      x = fpr_high_median,
+      y = sens_high_median,
+      xmin = fpr_high_l90pi,
+      xmax = fpr_high_u90pi
+    ),
+    height=0.02, colour=viridis(10)[4]
+  ) +
+  geom_errorbar(
+    data = fit_bias_pi90,
+    aes(
+      x = fpr_low_median,
+      y = sens_low_median,
+      ymin = sens_low_l90pi,
+      ymax = sens_low_u90pi
+    ),
+    width=0.02, colour=viridis(10)[8]
+  ) +
+  geom_errorbarh(
+    data = fit_bias_pi90,
+    aes(
+      x = fpr_low_median,
+      y = sens_low_median,
+      xmin = fpr_low_l90pi,
+      xmax = fpr_low_u90pi
+    ),
+    height=0.02, colour=viridis(10)[8]
+  ) +
+  theme_dab() +
+  scale_colour_manual(
+    values = c(viridis(10)[4],
+               viridis(10)[9])) +
+#  xlim(0,1) + ylim(0,1) +
+  geom_abline(slope=1, intercept = 0, linetype=2) -> g_fit_bias
+
+#hypothesis(fit_bias, "`TByes:risk_biasLow`<0")
+#hypothesis(fit_bias, "`TBno:risk_biasLow`<0")
+
+### trend by year?
+fit_year <- brm(
+  P | trials(total) ~ 0 + TB + TB:year + 
+    (0 + TB | ref),
+  data = r1df_2x2 %>% mutate(year = year - 2007) ,
+  family = binomial()
+)
+#hypothesis(fit_year, "`TByes:year`<0.01")
+
+### association with HIV proportion?
+fit_hiv <- brm(
+  P | trials(total) ~ 0 + TB + TB:hiv + 
+    (0 + TB | ref),
+  data = r1df_2x2 %>% mutate(hiv = as.numeric(hiv)),
+  family = binomial()
+)
+#hypothesis(fit_hiv, "`TByes:hiv`>0")
+
+### association with study sample size?
+fit_nTB <- brm(
+  P | trials(total) ~ 0 + TB + TB:n_TB_log + 
+    (0 + TB | ref),
+  data = r1df_2x2 %>%
+    left_join(
+      r1df_reduced_cc %>%
+        transmute(ref=ref, n_TB_log = log(TP + FN))),
+  family = binomial()
+)
+#hypothesis(fit_nTB, "`TByes:n_TB_log`<0")
+
+
+conditional_effects(fit_nTB)[[2]] %>%
+  dplyr::select(n_TB_log, TB, 
+                estimate = estimate__, se__, lower__, upper__) %>%
+  mutate(
+    parameter = case_when(
+      TB=="yes" ~ "sens",
+      TB=="no" ~ "1-spec"),
+    sample_size = exp(n_TB_log)
+    ) %>%
+  ggplot(
+    aes(x=sample_size,
+        y=estimate,
+        ymin=lower__,
+        ymax=upper__,
+        colour=parameter,
+        fill=parameter)
+  ) +
+  geom_smooth(se=FALSE) +
+  geom_ribbon(alpha=0.2, colour=NA) +
+  theme_dab() +
+  scale_colour_ptol() +
+  scale_fill_ptol() +
+  xlab("Sample size (n with TB)") -> g1
+
+
+conditional_effects(fit_hiv)[[2]] %>%
+  dplyr::select(hiv, TB, 
+                estimate = estimate__, se__, lower__, upper__) %>%
+  mutate(
+    parameter = case_when(
+      TB=="yes" ~ "sens",
+      TB=="no" ~ "1-spec")
+    ) %>%
+  ggplot(
+    aes(x=hiv,
+        y=estimate,
+        ymin=lower__,
+        ymax=upper__,
+        colour=parameter,
+        fill=parameter)
+  ) +
+  geom_smooth(se=FALSE) +
+  geom_ribbon(alpha=0.2, colour=NA) +
+  theme_dab() + theme(legend.position = "none") +
+  scale_colour_ptol() +
+  scale_fill_ptol() +
+  xlab("Proportion HIV positive in study") -> g2
+
+conditional_effects(fit_year)[[2]] %>%
+  dplyr::select(year, TB, 
+                estimate = estimate__, se__, lower__, upper__) %>%
+  mutate(
+    parameter = case_when(
+      TB=="yes" ~ "sens",
+      TB=="no" ~ "1-spec")
+    ) %>%
+  ggplot(
+    aes(x=year+2007,
+        y=estimate,
+        ymin=lower__,
+        ymax=upper__,
+        colour=parameter,
+        fill=parameter)
+  ) +
+  geom_smooth(se=FALSE) +
+  geom_ribbon(alpha=0.2, colour=NA) +
+  theme_dab() + theme(legend.position = "none") +
+  scale_colour_ptol() +
+  scale_fill_ptol() +
+  xlab("Publication year") -> g3
+
+```  
+
+### Meta-regression: covariates versus diagnostic performance 
+
+Association of study-level covariates with reported diagnostic performance of blood NAAT was formally investigated using bivariate random-effects modelling.  
+
+These was some evidence that reported sensitivity was associated with risk of bias assessed through adapted QUADAS-2: studies assessed as low risk of bias reported lower sensitivity on average (figure 9). Posterior probability that low-bias risk studies had lower reported sensitivity than 'high or moderate' bias risk studies was `r round(as.numeric(hypothesis(fit_bias, "TBno:risk_biasLow<0")$hypothesis[7]),2)*100`%.  
+
+There was also a `r round(as.numeric(hypothesis(fit_nTB, "TByes:n_TB_log<0")$hypothesis[7]),2)*100`% posterior probability that larger sample size studies reported lower sensitivity than smaller sample size studies (figure 10).  
+
+There was no significant evidence that reported sensitivity  for TB diagnosis was improving over time as NAAT technologies have evolved (rather there was a 'non-significant' weak downward trend, with `r round(as.numeric(hypothesis(fit_year, "TByes:year<0.01")$hypothesis[7]),2)*100`% posterior probability that sensitivity was *decreasing* by year of publication (figure 10).  
+
+Proportion of study participants who were HIV positive was not convincingly related to reported diagnostic performance of NAAT with `r round(as.numeric(hypothesis(fit_hiv, "TByes:hiv>0.01")$hypothesis[7]),2)*100`% posterior probability that sensitivity was higher in studies recruiting more patients who were HIV positive (figure 10).  
+
+```{r figure_9, fig.cap="Bivariate random-effects model with assessed risk of study bias as covariate (high/moderate bias = blue; low bias = green) for performance of blood NAAT for TB diagnosis (review 1). Ellipses show 95%CrI for mean (expected) values; 90% prediction intervals shown with whisker intervals.", fig.width=4, fig.height=3}
+
+g_fit_bias
+
+```  
+
+```{r figure_10, fig.cap="Conditional effects of 3 study-level covariates on reported performance in blood NAAT studies for TB diagnosis (review 1).", fig.height=2.5, fig.width=7}
+
+g3 | g2 | g1
+
+```  
+
+## Summary review 1
+
+Since the 1990s dozens of reports describing use of NAAT on patient blood samples for TB diagnosis have been published, with extreme heterogeneity in reported sensitivity and specificity, not obviously related to plausible biological or technical covariates. Most studies are poorly reported and are assessed to have high risk of bias. Mostly, in house PCR methods have been used with a wide variety of specific methodologies. Promising results in smaller reports have not been replicated in larger, low-bias studies. Results from scalable / widely available commercial PCR platforms have been disappointing.  
+
+
+# Systematic Review 2: *M. tuberculosis* blood stream infection diagnosis using blood NAAT
+
+## Introduction
+
+Marked heterogeneity in sensitivity of blood NAAT for diagnosing tuberculosis could be related to disease spectrum of included TB cases in studies, not captured by gross study-level covariates such as inpatient v outpatient and proportion of patients HIV positive examined in review 1 above. We know that severity of HIV-associated tuberculosis is closely related to presence of *M. tuberculosis* blood stream infection (MTBBSI) and the presence of MTBBSI is clearly a plausible determinant of probability that TB is detected by blood NAAT testing. Detection of MTBBSI by blood culture is therefore a useful reference standard against which blood NAAT detection of tuberculosis can be assessed. We hypothesised that comparing blood NAAT to blood culture for detection of *M.tb* could resolve some of the heterogeneity in reported sensitivity by accounting for variance in disease spectrum of recruited cases in different studies, and therefore proposed a second systematic review limited to studies which peformed both blood NAAT and blood culture for detection of MTBBSI.  
+
+### Aims and objectives
+
+Objective is to summarise reported sensitivity of blood NAAT compared to mycobacterial blood culture.  
+
+Aims:  
+
+1. Summarise reported relative sensitivity of blood TB-NAAT and TB blood culture against an external reference standard.
+2. Summarise reported sensitivity of blood TB-NAAT against TB blood culture as the reference standard.  
+Note that specificity estimation is not an objective: this is justified as heterogeneity in sensitivity in systematic review 1 is the problem to be addressed.  
+
+### Included studies
+
+Included studies will be the subset of studies in review 1 that also performed a TB blood culture (liquid or solid media).  
+
+Studies which do not report results such that a 2x2 table cross-tabulating blood culture and NAAT results could be extracted were excluded.  
+
+[post hoc protocol edit:]
+*Studies where the TB reference standard was based on TB blood culture were excluded for aim 1 but were retained in aim 2 analysis].*  
+
+
+### Data for extraction
+
+1. **n_tb_diagnosis** : Number of patients who were classified as having TB diagnosis who had a valid TB blood culture and a blood NAAT performed.
+2. **n_bloodculture**	: Number of TB patients who were TB blood culture positive.
+3. **n_bloodnaat** : Number of TB patients who were TB blood NAAT positive.
+4. **n_bc_naat** : Number of TB blood culture positive patients who were also blood NAAT positive.  
+
+In addition to covariates assessed in review 1.
+
+### Analysis plan
+
+Descriptive summaries using figures and tables.  
+
+For aim 1 (*Summarise reported relative sensitivity of blood TB-NAAT and TB blood culture against an external reference standard*) we anticipate correlation between reported sensitivity of blood culture and blood NAAT by study. Therefore a bivariate random-effects regression acounting for this correlation will be used to summarise central tendancies and heterogeneity. Ratio or difference measures for sensitivity of the two methods will then be derived.  
+
+For aim 2 (*Summarise reported sensitivity of blood TB-NAAT against TB blood culture as the reference standard*) a univariate binomial regression model with random-effects by study will be used to summarise central tendancies and heterogeneity.  
+
+Models will be fit using a Baysian (MCMC) approach implemented with the package *brms* in R studio. Meta-regression on selected covariates will be performed using bivariate regression to test association between study and method covariates and diagnostic performance if sufficient studies are identified to do so.  
+
+
+## Screening results
+
+From the 42 studies identified for review 1, 16 performed a mycobacterial blood culture; 2 of these did not report the results such that a 2x2 cross-tabulation of blood culture and blood NAAT could be extracted, leaving 14 studies with both blood culture and blood NAAT for inclusion in review 2 (figure 11, PRISMA flow chart). Of these 14 studies, 5 used TB blood culture result as the reference standard for TB diagnosis, meaning n=9 studies were available for aim 1. In one study all TB blood cultures were negative, meaning n=13 studies were available for aim 2 analysis.  
+
+```{r}
+
+read_csv("review2.csv") %>%
+  mutate(
+    ref = paste0(
+      word(author), "_", year
+    )
+  ) -> r2df
+
+# counts for prisma flow chart
+n_refs = length(unique(r2df$ref)) 
+n_studies = nrow(r2df)
+exc_2x2 = sum(r2df$exclude)
+ref_bc = sum(r2df$ext_ref_is_bc)
+no_bc = included_r1_n - n_studies
+
+
+r2df %>%
+  filter(exclude==0) %>%
+  select(
+    ref, year, region, setting, design,
+    hiv, age, bias_risk,
+    naat, volume_ml, preprocessing,
+    ext_ref_is_bc,
+    n_TB, n_tb_had_BcandNAAT,
+    n_bloodculture, n_bloodnaat, n_bc_naat)%>%
+  group_by(ref) %>%
+  mutate(subindex = row_number(ref)) %>%
+  ungroup() %>%
+  mutate(
+    ref = ifelse(subindex>1,
+                 paste0(ref, "_", LETTERS[subindex]),
+                 ref)) -> r2df
+
+
+```  
+
+```{r prisma_flow_diagram_2}
+
+
+tibble(x= seq(10,130,length.out = 100),
+       y= seq(40, 100, length.out = 100)) %>%
+  ggplot(aes(x,y))+
+  scale_x_continuous(minor_breaks = seq(10, 130, 10)) +
+  scale_y_continuous(minor_breaks = seq(40, 100, 10)) +
+  theme_void() +
+  geom_rect(xmin = 30, xmax=99, ymin=91, ymax=99, color='black', # 1
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 32, y=95,
+           label= paste0(
+             "From review 1, ", included_r1_n,
+             " uses of NAAT on blood to diagnose TB\n",
+             "reported in ", unique_pubs_n, " studies ",
+             "(", twopcrmethods_n, " papers reported 2 NAAT methods)"
+           ),
+           size=2.5, hjust=0) +
+  geom_rect(xmin = 80, xmax=115, ymin=81, ymax=88, color='black', # 2
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 82, y=85,
+           label= paste0(
+             no_bc, " studies did not\nperform TB blood culture"
+           ),
+           size=2.5, hjust=0) +
+  geom_rect(xmin = 30, xmax=99, ymin=71, ymax=79, color='black', # 3
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 32, y=75,
+           label= paste0(
+             "Studies performing TB blood culture:\n", n_studies,
+             " uses of NAAT on blood to diagnose TB ",
+             "reported\nin ", n_refs, " studies ",
+             "(2", " papers reported 2 NAAT methods)"
+           ),
+           size=2.5, hjust=0) +
+  geom_rect(xmin = 80, xmax=115, ymin=61, ymax=69, color='black', # 4
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 82, y=65,
+           label= paste0(
+             exc_2x2, " studies did not report\n2x2 cross-tab of TB blood\nculture and NAAT"
+           ),
+           size=2.5, hjust=0) +
+  geom_rect(xmin = 30, xmax=99, ymin=41, ymax=59, color='black', # 5
+            fill='white', size=0.25, size=0.25) +
+  annotate('text', x= 32, y=50,
+           label= paste0(
+             "For analysis in review 2:\n\n* ", n_studies-2,
+             " uses of NAAT on blood to diagnose TB\n",
+             "reported in ", n_refs-2, " studies ",
+             "(2", " papers reported 2 NAAT methods)\n\n* ",
+             ref_bc, " of these studies used TB blood culture as reference\nstandard; 1 study had zero positive TB blood cultures."
+           ),
+           size=2.5, hjust=0) +
+  geom_segment(
+    x=65, xend=65, y=91, yend=80, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) +
+  geom_segment(
+    x=65, xend=65, y=71, yend=60, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) +
+  geom_segment(
+    x=65, xend=77.5, y=85, yend=85, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) +
+  geom_segment(
+    x=65, xend=77.5, y=66, yend=66, 
+    size=0.15, linejoin = "mitre", lineend = "butt",
+    arrow = arrow(length = unit(1, "mm"), type= "closed")) -> r2_flow
+
+
+```  
+
+```{r fig11_PRISMA_2, fig.cap="PRISMA flow chart for systematic review 2"}
+
+r2_flow
+
+```  
+
+## Comparing sensitivity of blood TB-NAAT and TB blood culture against an external reference standard
+
+```{r aim1_regression, results='hide'}
+
+r2df %>%
+  filter(ext_ref_is_bc!=1) %>%
+  select(
+    ref, bias_risk,
+    n_tb_had_BcandNAAT,
+    n_bloodculture, n_bloodnaat,
+  ) %>%
+  pivot_longer(
+    names_to = "method", values_to = "positive", 4:5
+  ) %>%
+  mutate(
+    method = case_when(
+      method=="n_bloodculture" ~ "culture",
+      method=="n_bloodnaat" ~ "naat"
+      ),
+    bias_risk = ifelse(bias_risk=="low",
+                       "Low", "High/mod")
+    ) %>%
+  select(ref, bias_risk, method,
+         N = n_tb_had_BcandNAAT, p = positive) -> r2.1df
+
+
+fit0 <- brm(
+  p | trials(N) ~ 0 + method +(0 + method | ref),
+  data = r2.1df,
+  family = binomial()
+)
+
+### visualising the model fit 
+# 95% cred interval ellipse
+brms::posterior_samples(fit0) %>%
+    as_tibble() %>%
+    dplyr::select(b_methodculture,
+                  b_methodnaat) -> fit0df
+
+dataEllipse(x = fit0df$b_methodculture,
+            y = fit0df$b_methodnaat,
+            levels = 0.95, draw = FALSE) %>% as_tibble() -> fit0_ci95contour
+
+
+# and 95% prediction intervals
+nd = data.frame(
+  N = 1e3,
+  ref = "ref_x",
+  method = c("culture", "naat")
+)
+
+posterior_predict(
+  fit0,
+  newdata = nd,
+  re_formula = P | trials(total) ~ 0 + method +(0 + method | ref),
+  allow_new_levels=TRUE,
+  subset = 1:1e3,
+  seed = 140916
+) %>% as_tibble() %>%
+  transmute(
+    culture = V1/1e3,
+    naat = V2/1e3
+  ) %>%
+  summarise(
+    culture_median = quantile(culture, probs = 0.5),
+    culture_l90pi = quantile(culture, probs = 0.05),
+    culture_u90pi = quantile(culture, probs = 0.95),
+    naat_median = quantile(naat, probs = 0.5),
+    naat_l90pi = quantile(naat, probs = 0.05),
+    naat_u90pi = quantile(naat, probs = 0.95)
+  ) -> fit0_pi90
+
+posterior_predict(
+  fit0,
+  newdata = nd,
+  re_formula = P | trials(total) ~ 0 + method + (0 + method | ref),
+  allow_new_levels = TRUE,
+  subset = 1:1e3,
+  seed = 140916
+) %>% as_tibble() %>%
+  transmute(delta_naat_to_culture = (V2/1e3) - (V1/1e3)) %>%
+  summarise(
+    higher_sensitivity_naat = sum(delta_naat_to_culture>0)/sum(delta_naat_to_culture>-1.1)
+  ) -> post_prob_naat_sens_higher_culture
+
+posterior_predict(
+  fit0,
+  newdata = nd,
+  re_formula = P | trials(total) ~ 0 + method + (0 + method | ref),
+  allow_new_levels = TRUE,
+  subset = 1:1e3,
+  seed = 140916
+) %>% as_tibble() %>%
+  transmute(delta_naat_to_culture = (V2/1e3) - (V1/1e3)) %>%
+  ggplot(
+    aes(delta_naat_to_culture)
+  ) +
+  geom_density(
+    fill="steelblue", alpha=0.5
+  ) +
+  xlim(-1.0,1.0) +
+  geom_vline(xintercept = 0) +
+  theme_dab() +
+  xlab("Blood NAAT sensitivity\n    - blood culture sensitivity") +
+  ylab("Posterior density") -> g_post_density_delta_sens
+
+
+r2.1df %>%
+  bind_cols(
+    posterior_predict(
+      fit0,
+      newdata = r2.1df,
+      re_formula = P | trials(total) ~ 0 + method + (0 + method | ref),
+      subset = 1:1e3,
+      seed = 140916
+    ) %>% as_tibble() %>%
+      pivot_longer(1:18) %>%
+      group_by(name) %>%
+      summarise(
+        fit = median(value),
+        fit_l95 = quantile(value, probs = 0.025),
+        fit_u95 = quantile(value, probs = 0.975)
+      )
+  ) %>%
+  mutate(
+    sens = p/N,
+    sens_fit = fit/N,
+    sens_fit_l95 = fit_l95/N,
+    sens_fit_u95 = fit_u95/N
+  ) %>%
+  select(ref, method, N, sens,
+         sens_fit, sens_fit_l95, sens_fit_u95) %>%
+  ungroup() %>%
+  pivot_wider(
+    id_cols = c(ref, N),
+    names_from = method,
+    values_from = c(
+      sens, sens_fit, sens_fit_l95, sens_fit_u95)) -> fit0_indstudies
+
+fit0_indstudies %>%
+  ggplot() +
+  geom_abline(intercept = 0, slope=1, linetype=2) +
+  geom_point(
+    aes(sens_fit_culture, sens_fit_naat,
+        size=N),
+    alpha=0.75, colour="steelblue"
+  ) +
+  geom_errorbar(
+    aes(x = sens_fit_culture,
+        ymin = sens_fit_l95_naat,
+        ymax = sens_fit_u95_naat), 
+    colour="steelblue"
+  ) +
+  geom_errorbarh(
+    aes(y = sens_fit_naat,
+        xmin = sens_fit_l95_culture,
+        xmax = sens_fit_u95_culture), 
+    colour="steelblue"
+  ) +
+  theme_dab() +
+  theme(legend.position = "none") +
+  xlab("Model fit sensitivity blood culture") +
+  ylab("Model fit sensitivity blood NAAT") -> g_fit_cul_v_naat_indstudies
+
+
+# plot these on the raw data
+
+r2df %>%
+  filter(ext_ref_is_bc!=1) %>%
+  transmute(
+    ref = ref,
+    culture_sens = n_bloodculture / n_tb_had_BcandNAAT,
+    naat_sens = n_bloodnaat / n_tb_had_BcandNAAT,
+    N = n_tb_had_BcandNAAT,
+    bias_risk = ifelse(bias_risk=="low",
+                       "Low", "High/mod")
+  ) %>%
+  ggplot() +
+  geom_abline(intercept = 0, slope=1) +
+  geom_point(
+    aes(culture_sens, naat_sens, size=N),
+    alpha=0.25
+  ) +
+  geom_polygon(
+    data=fit0_ci95contour,
+    aes(inv_logit_scaled(x), inv_logit_scaled(y)),
+    size=0.5,
+    alpha=0.2,
+    fill=viridis(10, option = "magma")[6],
+    colour=NA) +
+  geom_errorbarh(
+    data = fit0_pi90,
+    aes(
+      x = culture_median,
+      y = naat_median,
+      xmin = culture_l90pi,
+      xmax = culture_u90pi
+    ),
+    height = 0.02,
+    colour=viridis(10, option = "magma")[6]
+  ) +
+  geom_errorbar(
+    data = fit0_pi90,
+    aes(
+      x = culture_median,
+      y = naat_median,
+      ymin = naat_l90pi,
+      ymax = naat_u90pi
+    ),
+    width = 0.02,
+    colour=viridis(10, option = "magma")[6]
+  ) +
+  theme_dab() +
+  xlim(0,1) + ylim(0,1) +
+  xlab("Sensitivity blood culture") +
+  ylab("Sensitivity blood NAAT") -> g_bivariate_sens_plot
+
+
+
+#r2df %>%
+#  filter(ext_ref_is_bc!=1) %>%
+#  transmute(
+#    ref = ref,
+#    culture_sens = n_bloodculture / n_tb_had_BcandNAAT,
+#    naat_sens = n_bloodnaat / n_tb_had_BcandNAAT,
+#    N = n_tb_had_BcandNAAT,
+#    bias_risk = ifelse(bias_risk=="low",
+#                       "Low", "High/mod")
+#  ) %>%
+#  ggplot() +
+#  geom_abline(intercept = 0, slope=1) +
+#  geom_point(
+#    aes(culture_sens, naat_sens, size=N, colour=bias_risk),
+#    alpha=0.25
+#  ) +
+#  theme_dab() +
+#  xlim(0,1) + ylim(0,1) +
+#  xlab("Sensitivity blood culture") +
+#  ylab("Sensitivity blood NAAT") +
+#  scale_color_aaas() -> g_bias_bivariate
+
+
+```  
+
+
+In studies reporting sensitivity of blood NAAT and bood culture for TB diagnosis against an external reference standard there was, as expected, correlation between the sensitivities of the two methods across studies (r = 0.48 estimated from bivariate mixed-effects regression). Most studies reported higher sensitivity of NAAT compared to culture, but with substantial heterogeneity resulting in uncertainty and 95% credibility intervals encompassing both better and worse sensitiviy for NAAT (figure 12). Larger sample size and lower risk-of-bias studies reported lower relative sensitivity of NAAT on average, but the number of studies available did not support formal meta-regression.  
+
+```{r fig12_bivariate_sens_culture_naat, fig.width=6, fig.height=3, fig.cap="Bivariate mixed-effects regression relative sensitivity of TB blood culture and blood NAAT versus an external reference standard for TB diagnosis (review 2, aim 1). Left panel shows individual studies raw data for sensitivities (grey circles) and the 95%CrI for the median population value (red shaded area) and 90% prediction intervals for  a new unobserved study (red lines). Right panel shows distribution of posterior estimates from the model for difference in sensitivity (estimate for sensitivity of NAAT minus sensitivity of culture); most probability was asigned by the model to higher sensitivity of NAAT, to the right of vertical black line."}
+
+g_bivariate_sens_plot | g_post_density_delta_sens
+
+
+```  
+
+
+
+## Assessing sensitivity of blood TB-NAAT against TB blood culture as the reference standard
+
+
+```{r aim2_regression, results='hide'}
+
+r2df %>%
+  transmute(
+    ref = ref, 
+    bias_risk = ifelse(bias_risk=="low",
+                       "Low", "High/mod"),
+    year = year,
+    commercial_kit = grepl(pattern = "Xpert|Hain", naat),
+    xpert = grepl(pattern = "Xpert", naat),
+    N = n_bloodculture, p = n_bc_naat
+  ) %>%
+  filter(
+    N>0 # Honore 2001 has no positive BC
+    ) -> r2.2df
+
+
+fit0 <- brm(
+  p | trials(N) ~ 1 +(1 | ref),
+  data = r2.2df,
+  family = binomial()
+)
+
+fit_bias <- brm(
+  p | trials(N) ~ bias_risk +(1 | ref),
+  data = r2.2df,
+  family = binomial()
+)
+
+fit_year <- brm(
+  p | trials(N) ~ year +(1 | ref),
+  data = r2.2df,
+  family = binomial()
+)
+
+fit_kit <- brm(
+  p | trials(N) ~ commercial_kit +(1 | ref),
+  data = r2.2df,
+  family = binomial()
+)
+
+fit_xpert <- brm(
+  p | trials(N) ~ xpert +(1 | ref),
+  data = r2.2df,
+  family = binomial()
+)
+
+fit_N <- brm(
+  p | trials(N) ~ N +(1 | ref),
+  data = r2.2df,
+  family = binomial()
+)
+
+
+
+
+# uncertainty in fit estimate
+nd = data.frame(
+  N = 500
+)
+max_iter = 1e3
+
+posterior_predict(
+  fit0,
+  newdata = nd,
+  re_formula = NA,
+  subset = 1:max_iter,
+  seed = 140916
+) %>%
+  as_tibble() %>%
+  summarise(
+    fit_median = quantile(V1/500, probs = 0.5),
+    fit_l95 = quantile(V1/500, probs = 0.025),
+    fit_u95 = quantile(V1/500, probs = 0.975)
+  ) -> fit0_CI
+
+
+# and 90% prediction intervals
+nd = data.frame(
+  N = 500,
+  ref = "ref_x"
+)
+
+posterior_predict(
+  fit0,
+  newdata = nd,
+  re_formula = p | trials(N) ~ 1 +(1 | ref),
+  allow_new_levels=TRUE,
+  subset = 1:1e3,
+  seed = 140916
+) %>% as_tibble() %>%
+  summarise(
+    predict_median = quantile(V1/500, probs = 0.5),
+    predict_l90pi = quantile(V1/500, probs = 0.05),
+    predict_u90pi = quantile(V1/500, probs = 0.95)
+  ) -> fit0_pi90
+
+
+
+r2.2df %>%
+  bind_cols(fitted(fit0) %>% as_tibble()) %>%
+  transmute(ref = ref,
+            N = N,
+            Estimate = Estimate/N,
+            Q2.5 = Q2.5/N,
+            Q97.5 = Q97.5/N) %>%
+  ggplot(
+    aes(ref, Estimate, 
+        ymin = Q2.5, ymax = Q97.5)
+  ) +
+  geom_rect(xmin=0, xmax=14,
+            ymin=as.numeric(fit0_pi90[2]), ymax=as.numeric(fit0_pi90[3]),
+            alpha=0.01, fill=viridis(n=8)[7]) +
+  geom_hline(yintercept = as.numeric(fit0_CI[1])) +
+  geom_hline(yintercept = as.numeric(fit0_CI[2]), linetype=2) +
+  geom_hline(yintercept = as.numeric(fit0_CI[3]), linetype=2) +
+  geom_point(
+    colour=viridis(n=8)[5]
+    ) +
+  geom_errorbar(width=0.3, colour=viridis(n=8)[5]) + 
+  ylab("Sensitivity for TB blood\nculture +ve disease") +
+  xlab("") +
+  coord_flip() +
+  theme_dab() -> g_forest2.2
+
+
+# meta-rege=ression results
+
+bind_rows(
+  posterior_predict(
+    fit_bias,
+    newdata = data.frame(N = 500, bias_risk = c("High/mod", "Low")),
+    re_formula = NA,
+    subset = 1:max_iter,
+    seed = 140916
+  ) %>%
+    as_tibble() %>%
+    transmute(delta = (V2 / 500) - (V1 / 500)) %>%
+    summarise(
+      delta_median = quantile(delta, probs = 0.5),
+      delta_l95 = quantile(delta, probs = 0.025),
+      delta_u95 = quantile(delta, probs = 0.975)
+    ) %>%
+    mutate(effect = "low bias",
+           comparator = "high/moderate bias"),
+  
+  
+  posterior_predict(
+    fit_year,
+    newdata = data.frame(N = 500, year = c(1995, 2015)),
+    re_formula = NA,
+    subset = 1:max_iter,
+    seed = 140916
+  ) %>%
+    as_tibble() %>%
+    transmute(delta = (V2 / 500) - (V1 / 500)) %>%
+    summarise(
+      delta_median = quantile(delta, probs = 0.5),
+      delta_l95 = quantile(delta, probs = 0.025),
+      delta_u95 = quantile(delta, probs = 0.975)
+    ) %>%
+    mutate(effect = "year 2015",
+           comparator = "year 1995"),
+  
+  
+  posterior_predict(
+    fit_kit,
+    newdata = data.frame(N = 500, commercial_kit = c(FALSE, TRUE)),
+    re_formula = NA,
+    subset = 1:max_iter,
+    seed = 140916
+  ) %>%
+    as_tibble() %>%
+    transmute(delta = (V2 / 500) - (V1 / 500)) %>%
+    summarise(
+      delta_median = quantile(delta, probs = 0.5),
+      delta_l95 = quantile(delta, probs = 0.025),
+      delta_u95 = quantile(delta, probs = 0.975)
+    ) %>%
+    mutate(effect = "commercial_kit",
+           comparator = "in house kit"),
+  
+  posterior_predict(
+    fit_N,
+    newdata = data.frame(N = 500, N = c(5, 50)),
+    re_formula = NA,
+    subset = 1:max_iter,
+    seed = 140916
+  ) %>%
+    as_tibble() %>%
+    transmute(delta = (V2 / 500) - (V1 / 500)) %>%
+    summarise(
+      delta_median = quantile(delta, probs = 0.5),
+      delta_l95 = quantile(delta, probs = 0.025),
+      delta_u95 = quantile(delta, probs = 0.975)
+    ) %>%
+    mutate(effect = "Study size, N=50",
+           comparator = "Study size, N=5")
+) -> r2.2_metaregression
+
+
+r2.2_metaregression %>%
+  transmute(
+    effect = effect,
+    comparator = comparator,
+    `delta sensitivity` = round(delta_median, 2),
+    `95% CrI` = paste0(
+      round(delta_l95, 2),
+      " to ",
+      round(delta_u95, 2)
+    )
+  ) -> r2.2_metaregression
+
+
+```  
+
+13 studies have reported TB blood culture and TB blood NAAT results in same patients. Estimated sensitivity of TB blood NAAT for TB blood culture cases (population median across all 13 studies, figure 13) was `r round(as.numeric(fit0_CI[1]),2)`, but with substantial uncertainty for this population estimate (95% CrI `r round(as.numeric(fit0_CI[2]),2)` to `r round(as.numeric(fit0_CI[3]),2)`, and 90% prediction interval for  a new, unobserved study `r round(as.numeric(fit0_pi90[2]),2)` to `r round(as.numeric(fit0_pi90[3]),2)`) due to heterogeneity and the limited amount of published data (in total, blood TB NAAT  results have only been reported for `r sum(r2.2df$N)` TB blood culture positive patients, with median of `r median(r2.2df$N)` patients per study).  
+
+This means there is limited power to support meta-regression. More recent studies, studies using commercial NAAT kits, and studies assessed to be at lower risk of bais all had lower reported sesnitivity of NAAT for TB blood culture positive disease but none of these associations reached a >95% posterior probability statistical significance level (table 1).  
+
+
+```{r fig13_sens_for_bld_culture_pos_TB, fig.width=3, fig.height=3, fig.cap="Mixed-effects regression blood NAAT sensitivity for detection of blood culture positive TB (review 2, aim 2). Fit and 95%CrI for individiual studies shown with green dots and whisters; estimated population median and 95%CrI shown with vertical solid and dashed lines respectively; 90% prediction intervals for a new unobserved study indicated by shaded green area."}
+
+g_forest2.2
+
+```  
+
+```{r}
+
+kable(r2.2_metaregression, caption = "Mixed-effects meta-regression blood NAAT sensitivity for detection of blood culture positive TB: estimated difference in sensitivity of blood NAAT for two levels of study level variables.", booktabs=T)
+  
+
+```  
+
+## Summary review 2
+
+Published data on blood NAAT for TB diagnosis where sensitivity can be related to a concomitant TB blood culture is sparse. This data was reviewed because sensitivity of blood TB NAAT relative to TB blood culture allows a degree of adjustment for disease spectrum which we hypothesised might underlie the extreme heterogeneity described in review 1. However, variance in reported sensitivity of TB blood NAAT was still pronounced relative to TB blood culture and within the strata of patients who were TB blood culture positive. Reported sensitivity of TB blood NAAT was again lower on average in low bias rated studies, studies using commercial NAAT kits, and in more recently reported studies compared to initial reports in 1990s; these associations were not statistically significant, which may relate to the limited amount of data available in review 2.  
+
+
