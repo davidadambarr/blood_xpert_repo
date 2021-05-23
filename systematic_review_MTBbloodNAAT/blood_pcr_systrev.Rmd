@@ -51,7 +51,7 @@ This document reports two systematic reviews and meta-analyses of literature on 
 
 The motivation for these reviews is to inform the "Evidence before this study" section of the *Research in context* box for the KDHTB blood Xpert-ultra manuscript submission to *Lancet Microbe*.  
 
-This document is an Rmarkdown knitted as a pdf. This means alll the code for the analysis from raw data to final figures is embedded (so 100% reproducible). The code chunks are suppressed for readability but available at git repository [url: ].  
+This document is an Rmarkdown knitted as a pdf. This means alll the code for the analysis from raw data to final figures is embedded (so 100% reproducible). The code chunks are suppressed for readability but available at [github repository](https://github.com/davidadambarr/blood_xpert_repo).  
 
 
 # Systematic Review 1: TB diagnosis using blood NAAT
@@ -114,7 +114,6 @@ This retured [951 results](https://pubmed.ncbi.nlm.nih.gov/?term=%28%22tuberculo
 
 ### Scopus
 
-[ *DB: Accepted practice when doing a systematic review is to search multiple databases. But this inevitably means searching a commercial database i.e. a database maintained by a for-profit organisation which requires a subscription. UoL has access to Scopus so have used this, but I find it less transparent how the search query works in Scopus.* ]  
 
 Scopus was searched with query:
 
@@ -124,9 +123,8 @@ Returning 537 results on 12/12/2020; these are exported as a .bib file using [se
 
 ### Combining search results, removing duplicates
 
-The .bib files are read in and combined, with duplicates identified by doi and removed:  
+The .bib files are read in and combined, with duplicates identified by doi and removed.  
 
-[embedded code supressed]
 
 ```{r}
 # read in & combine pubmed and scopus returned references
@@ -623,7 +621,7 @@ r1df %>%
   ) +
   geom_histogram(
     colour="black", fill=viridis(10)[2], alpha=0.5,
-    binwidth = 1
+    binwidth = 1, center=0.5
   ) +
   theme_dab() +
   xlab("") + ylab("") +
@@ -732,7 +730,7 @@ r1df %>%
 
 ## Description of included studies
 
-Characteristics of review 1 included studies are shown in figure 2 (study design, setting, patient population/cases, assessed risk of bias) and figure 3 (NAAT methods).  A wide variety of study designs, patient populations and NAAT methods have been reported, with little replication of specific approaches. Initial reports of blood NAAT for TB diagnosis had a peak in the 1990s then a relative hiatus, followed by an incresae again in last 10 years. 
+Characteristics of review 1 included studies are shown in figure 2 (study design, setting, patient population/cases, assessed risk of bias) and figure 3 (NAAT methods).  A wide variety of study designs, patient populations and NAAT methods have been reported, with little replication of specific approaches. Initial reports of blood NAAT for TB diagnosis had a peak in the 1990s then a relative hiatus, followed by an increase again in last 10 years. 
 
 ```{r figure_2, fig.cap="Description of review 1 included studies: study design, setting, patient population/cases, assessed risk of bias.", fig.width=8}
 
@@ -895,7 +893,7 @@ g7 <- g7 + theme(legend.position = "top") + guides(fill=guide_legend(nrow=2,byro
 
 ## Descriptive summaries of reported diagnostic performance
 
-Reported diagnostic performance in included studies are shown in figure 4-6. There are several striking findings. First, there is very marked heterogeneity in sensitivity (ranging from 0 to 100%), with very little evidence of correlation between sensitivity and specificity. Heterogeneity in sensitivity seems unrelated to study design, setting, HIV prevalance in study, or NAAT methods (blood volume, method of blood preprocessng) other than the finding that the studies using Xpert Rif/MTB had amongst the lowest reported sesnitivities. Average reported sensitivity of blood NAAT seems to have slightly decreased over time since initial reports in 1990s.  
+Reported diagnostic performance in included studies are shown in figure 4-6. There are several striking findings. First, there is very marked heterogeneity in sensitivity (ranging from 0 to 100%), with very little evidence of correlation between sensitivity and specificity. Heterogeneity in sensitivity seems unrelated to study design, setting, HIV prevalance in study, or NAAT methods (blood volume, method of blood preprocessng) other than the finding that the studies using Xpert Rif/MTB had amongst the lowest reported sensitivities. Average reported sensitivity of blood NAAT seems to have slightly decreased over time since initial reports in 1990s.  
 
 However, reported sensitivity does appear to vary somewhat by assessed risk of bias, with studies assessed as lower risk of bias, and larger studies, reporting lower sensitivity.  
 
@@ -1621,7 +1619,7 @@ Since the 1990s dozens of reports describing use of NAAT on patient blood sample
 
 ## Introduction
 
-Marked heterogeneity in sensitivity of blood NAAT for diagnosing tuberculosis could be related to disease spectrum of included TB cases in studies, not captured by gross study-level covariates such as inpatient v outpatient and proportion of patients HIV positive examined in review 1 above. We know that severity of HIV-associated tuberculosis is closely related to presence of *M. tuberculosis* blood stream infection (MTBBSI) and the presence of MTBBSI is clearly a plausible determinant of probability that TB is detected by blood NAAT testing. Detection of MTBBSI by blood culture is therefore a useful reference standard against which blood NAAT detection of tuberculosis can be assessed. We hypothesised that comparing blood NAAT to blood culture for detection of *M.tb* could resolve some of the heterogeneity in reported sensitivity by accounting for variance in disease spectrum of recruited cases in different studies, and therefore proposed a second systematic review limited to studies which peformed both blood NAAT and blood culture for detection of MTBBSI.  
+Marked heterogeneity in sensitivity of blood NAAT to diagnose tuberculosis could be related to disease spectrum of included TB cases in studies, not captured by gross study-level covariates such as inpatient v outpatient and proportion of patients HIV positive examined in review 1 above. We know that severity of HIV-associated tuberculosis is closely related to presence of *M. tuberculosis* blood stream infection (MTBBSI) and the presence of MTBBSI is clearly a plausible determinant of probability that TB is detected by blood NAAT testing. Detection of MTBBSI by blood culture is therefore a useful reference standard against which blood NAAT detection of tuberculosis can be assessed. We hypothesised that comparing blood NAAT to blood culture for detection of *M.tb* could resolve some of the heterogeneity in reported sensitivity by accounting for variance in disease spectrum of recruited cases in different studies, and therefore proposed a second systematic review limited to studies which peformed both blood NAAT and blood culture for detection of MTBBSI.  
 
 ### Aims and objectives
 
